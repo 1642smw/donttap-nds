@@ -14,26 +14,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Compile
+      - name: Build ROM
         run: |
+          # 激活 devkitARM 环境（绝对正确的路径）
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=${DEVKITPRO}/devkitARM
-          export PATH=${DEVKITARM}/bin:${DEVKITPRO}/tools/bin:${PATH}
+          export PATH=${DEVKITARM}/bin:${DEVKITPRO}/tools/bin:$PATH
 
-          # 编译源码
+          # 编译
           arm-none-eabi-gcc -g -Wall -O2 \
             -march=armv5te -mtune=arm946e-s -fomit-frame-pointer \
             -ffast-math -mthumb -mthumb-interwork -DARM9 \
             -I${DEVKITPRO}/libnds/include \
             -c donttap.c -o donttap.o
 
-          # 链接成 elf
+          # 链接
           arm-none-eabi-gcc \
             -specs=ds_arm9.specs -g -mthumb -mthumb-interwork \
             -L${DEVKITPRO}/libnds/lib \
             -o donttap.elf donttap.o -lnds9
 
-          # 打包成 .nds ROM
+          # 打包成 .nds
           ndstool -c donttap.nds -9 donttap.elf
 
       - name: Upload ROM
