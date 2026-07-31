@@ -14,13 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup environment and install libnds
-        run: |
-          export DEVKITPRO=/opt/devkitpro
-          export DEVKITARM=${DEVKITPRO}/devkitARM
-          export PATH=${DEVKITARM}/bin:${PATH}
-          dkp-pacman -Sy --noconfirm libnds
-
       - name: Build
         run: |
           export DEVKITPRO=/opt/devkitpro
