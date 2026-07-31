@@ -14,12 +14,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build
+      - name: Compile
         run: |
           export DEVKITPRO=/opt/devkitpro
           export DEVKITARM=${DEVKITPRO}/devkitARM
-          export PATH=${DEVKITARM}/bin:${PATH}
-          make
+          export PATH=${DEVKITARM}/bin:${DEVKITPRO}/tools/bin:${PATH}
+
+          # 编译源码
+          arm-none-eabi-gcc -g -Wall -O2 \
+            -march=armv5te -mtune=arm946e-s -fomit-frame-pointer \
+            -ffast-math -mthumb -mthumb-interwork -DARM9 \
+            -I${DEVKITPRO}/libnds/include \
+            -c donttap.c -o donttap.o
+
+          # 链接成 elf
+          arm-none-eabi-gcc \
+            -specs=ds_arm9.specs -g -mthumb -mthumb-interwork \
+            -L${DEVKITPRO}/libnds/lib \
+            -o donttap.elf donttap.o -lnds9
+
+          # 打包成 .nds ROM
+          ndstool -c donttap.nds -9 donttap.elf
 
       - name: Upload ROM
         uses: actions/upload-artifact@v4
